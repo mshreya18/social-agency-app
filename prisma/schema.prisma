@@ -22,6 +22,7 @@ model User {
   updatedAt DateTime @updatedAt
 
   questionnaire Questionnaire?
+  motherDoc     MotherDoc?
 }
 
 model Questionnaire {
@@ -33,4 +34,14 @@ model Questionnaire {
   interests      String
   goals          String
   updatedAt      DateTime @updatedAt
+}
+
+model MotherDoc {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id])
+  toneOfVoice      String   // AI-generated voice profile
+  contentPillars   String   // The 10 distinct sub-pillars of interest
+  baselineAccounts String   // Accounts they would like to emulate
+  updatedAt        DateTime @updatedAt
 }

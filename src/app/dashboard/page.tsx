@@ -4,6 +4,8 @@ import { FileUploadWidget } from "@/components/FileUploadWidget";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { generateMotherDoc } from "@/app/actions/motherDoc";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -14,7 +16,7 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
-    include: { questionnaire: true }
+    include: { questionnaire: true, motherDoc: true }
   });
 
   if (!user || !user.questionnaire) {
@@ -31,8 +33,8 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle>Your Mother Doc Profile</CardTitle>
-            <CardDescription>Generated from your onboarding insights</CardDescription>
+            <CardTitle>Client Intelligence Context</CardTitle>
+            <CardDescription>Raw data gathered during onboarding</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
@@ -56,16 +58,34 @@ export default async function DashboardPage() {
         
         <Card className="shadow-md">
           <CardHeader>
-            <CardTitle>Monthly Calendar</CardTitle>
-            <CardDescription>Your AI-generated social posts</CardDescription>
+            <CardTitle>AI Voice Mother Doc</CardTitle>
+            <CardDescription>Your Groq-synthesized custom profile</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="flex h-64 items-center justify-center rounded-md border-2 border-dashed border-gray-300 bg-gray-100/50">
-              <div className="text-center">
-                <div className="text-4xl mb-2">📅</div>
-                <p className="text-gray-500 font-medium">Calendar AI integration coming soon in Phase 4</p>
+          <CardContent className="h-full">
+            {user.motherDoc ? (
+              <div className="space-y-4">
+                <div>
+                  <span className="font-semibold text-gray-500 block mb-1">AI Tone of Voice:</span>
+                  <p className="bg-gray-100 p-2 rounded text-sm text-gray-800">{user.motherDoc.toneOfVoice}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-500 block mb-1">Your Specific Content Pillars:</span>
+                  <p className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-sm text-gray-800">{user.motherDoc.contentPillars}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-500 block mb-1">Baseline Emulation Accounts:</span>
+                  <p className="bg-gray-100 p-2 rounded text-sm text-gray-800">{user.motherDoc.baselineAccounts}</p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <form action={generateMotherDoc} className="text-center py-16 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md bg-gray-50 h-full">
+                <div className="text-5xl mb-4">🧠</div>
+                <p className="mb-6 text-gray-600 text-lg font-medium">The AI hasn't initialized your profile yet.</p>
+                <Button type="submit" size="lg" className="w-full max-w-xs font-bold text-md shadow-lg hover:scale-[1.02] transition-transform bg-indigo-600 hover:bg-indigo-700">
+                  Synthesize Voice with Groq
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
       </div>
