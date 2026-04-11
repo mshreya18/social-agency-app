@@ -26,7 +26,7 @@ npm install
 ### 2. Configure Environment Variables
 You must set up API credentials for the platform to function. Copy the provided example to create your local `.env.local` configuration file:
 \`\`\`bash
-cp .env.local.example .env.local
+cp .env.example .env.local
 \`\`\`
 
 You will need to manually populate these keys:
