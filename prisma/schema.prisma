@@ -46,6 +46,7 @@ model MotherDoc {
   toneOfVoice      String   // AI-generated voice profile
   contentPillars   String   // The 10 distinct sub-pillars of interest
   baselineAccounts String   // Accounts they would like to emulate
+  adminNotes       String?  // Admin-only context, extra instructions, or follow-up Q&A
   updatedAt        DateTime @updatedAt
 }
 

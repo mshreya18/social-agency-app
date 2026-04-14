@@ -9,6 +9,7 @@ import { generateMotherDoc } from "@/app/actions/motherDoc";
 import { generateContentPost } from "@/app/actions/contentGenerator";
 import { PostFeedbackActions } from "@/components/PostFeedbackActions";
 import { PostDatePicker } from "@/components/PostDatePicker";
+import { MotherDocEditor } from "@/components/MotherDocEditor";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -79,24 +80,11 @@ export default async function DashboardPage() {
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle>AI Voice Mother Doc</CardTitle>
-            <CardDescription>Your Groq-synthesized custom profile</CardDescription>
+            <CardDescription>Groq-synthesized profile — editable by admin</CardDescription>
           </CardHeader>
           <CardContent className="h-full">
             {user.motherDoc ? (
-              <div className="space-y-4">
-                <div>
-                  <span className="font-semibold text-gray-500 block mb-1">AI Tone of Voice:</span>
-                  <p className="bg-gray-100 p-2 rounded text-sm text-gray-800">{user.motherDoc.toneOfVoice}</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-500 block mb-1">Your Specific Content Pillars:</span>
-                  <p className="whitespace-pre-wrap bg-gray-100 p-2 rounded text-sm text-gray-800">{user.motherDoc.contentPillars}</p>
-                </div>
-                <div>
-                  <span className="font-semibold text-gray-500 block mb-1">Baseline Emulation Accounts:</span>
-                  <p className="bg-gray-100 p-2 rounded text-sm text-gray-800">{user.motherDoc.baselineAccounts}</p>
-                </div>
-              </div>
+              <MotherDocEditor motherDoc={user.motherDoc} />
             ) : (
               <form action={generateMotherDoc} className="text-center py-16 flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md bg-gray-50 h-full">
                 <div className="text-5xl mb-4">🧠</div>
