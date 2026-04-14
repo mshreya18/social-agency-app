@@ -36,7 +36,18 @@ export default async function DashboardPage() {
     <div className="flex min-h-screen w-full flex-col bg-gray-50 p-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-4xl font-bold">Your Social Agency Dashboard</h1>
-        <UserButton />
+        <div className="flex items-center gap-6">
+          {user.linkedinAccessToken ? (
+            <span className="text-sm font-bold text-green-700 bg-green-100 border border-green-300 px-4 py-2 rounded-md shadow-sm">
+              ✓ LinkedIn Attached
+            </span>
+          ) : (
+            <a href="/api/auth/linkedin" className="text-sm font-bold text-white bg-[#0077b5] hover:bg-[#005582] px-5 py-2 rounded-md shadow-sm transition-transform hover:scale-105">
+              Connect LinkedIn Account
+            </a>
+          )}
+          <UserButton />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -145,8 +156,26 @@ export default async function DashboardPage() {
                       <div className="overflow-y-auto pr-2">
                         <p className="text-sm text-gray-800 whitespace-pre-wrap">{post.content}</p>
                       </div>
-                      <div className="mt-4 pt-4 border-t flex justify-end shrink-0 w-full">
-                        <PostFeedbackActions postId={post.id} status={post.status} />
+                      <div className="mt-4 pt-4 border-t flex flex-col gap-3 shrink-0 w-full">
+                        {post.status === "APPROVED" && post.platform === "LinkedIn" && (
+                          <form className="w-full" action={async () => {
+                            "use server";
+                            const { publishToLinkedIn } = await import("@/app/actions/linkedinPublish");
+                            await publishToLinkedIn(post.id);
+                          }}>
+                            <Button type="submit" className="w-full bg-[#0077b5] text-white font-extrabold animate-pulse hover:bg-[#005582] shadow-md border-0 py-5 text-lg">
+                              Publish to LinkedIn Target Now 🚀
+                            </Button>
+                          </form>
+                        )}
+                        {(post.status !== "PUBLISHED" && post.status !== "APPROVED") && (
+                          <PostFeedbackActions postId={post.id} status={post.status} />
+                        )}
+                        {post.status === "PUBLISHED" && (
+                          <div className="w-full text-center py-2 bg-green-50 border border-green-200 rounded-md">
+                            <span className="font-extrabold text-green-700">✓ Live on LinkedIn</span>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

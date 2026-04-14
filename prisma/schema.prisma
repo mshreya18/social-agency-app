@@ -18,6 +18,8 @@ model User {
   email     String   @unique
   firstName String?
   lastName  String?
+  linkedinAccessToken String?  // For OAuth API publishing
+  linkedinAccountId   String?  // The URN id for the LinkedIn profile
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
