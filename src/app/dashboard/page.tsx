@@ -6,6 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { generateMotherDoc } from "@/app/actions/motherDoc";
+import { generateContentPost } from "@/app/actions/contentGenerator";
+import { PostFeedbackActions } from "@/components/PostFeedbackActions";
+import { PostDatePicker } from "@/components/PostDatePicker";
 
 export default async function DashboardPage() {
   const { userId } = await auth();
@@ -16,7 +19,13 @@ export default async function DashboardPage() {
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
-    include: { questionnaire: true, motherDoc: true }
+    include: {
+      questionnaire: true,
+      motherDoc: true,
+      generatedPosts: {
+        orderBy: { scheduledDate: 'asc' }
+      }
+    }
   });
 
   if (!user || !user.questionnaire) {
@@ -29,7 +38,7 @@ export default async function DashboardPage() {
         <h1 className="text-4xl font-bold">Your Social Agency Dashboard</h1>
         <UserButton />
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <Card className="shadow-md">
           <CardHeader>
@@ -55,7 +64,7 @@ export default async function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card className="shadow-md">
           <CardHeader>
             <CardTitle>AI Voice Mother Doc</CardTitle>
@@ -88,6 +97,69 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+      </div>
+
+      <div className="mt-12 pt-8 border-t border-gray-200">
+        <h2 className="text-3xl font-extrabold mb-6 flex items-center">
+          <span className="mr-3">🗓️</span> Content Generation Engine
+        </h2>
+
+        {user.motherDoc ? (
+          <div className="space-y-8">
+            <div className="flex flex-wrap gap-4 p-6 bg-white border border-gray-200 rounded-lg shadow-sm">
+              <div className="w-full mb-2">
+                <h3 className="font-semibold text-gray-700">Generate New Drafts using Groq AI</h3>
+                <p className="text-sm text-gray-500">The AI will use your Mother Doc tone and pillars to automatically construct high-converting posts scheduled to your calendar.</p>
+              </div>
+              <form action={generateContentPost.bind(null, "LinkedIn")}>
+                <Button type="submit" className="bg-[#0077b5] hover:bg-[#005582] text-white font-bold shadow-md transition-transform hover:scale-105">
+                  Generate LinkedIn Sequence
+                </Button>
+              </form>
+              <form action={generateContentPost.bind(null, "Substack")}>
+                <Button type="submit" className="bg-[#ff6719] hover:bg-[#cc5113] text-white font-bold shadow-md transition-transform hover:scale-105">
+                  Generate Substack Newsletter
+                </Button>
+              </form>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {user.generatedPosts.length === 0 ? (
+                <div className="col-span-full py-12 text-center bg-gray-50 rounded-lg border-2 border-dashed border-gray-200">
+                  <p className="text-gray-500 italic text-lg">Your content calendar is currently empty.</p>
+                  <p className="text-gray-400 text-sm mt-2">Click one of the platform buttons above to synthesize your very first post!</p>
+                </div>
+              ) : (
+                user.generatedPosts.map((post) => (
+                  <Card key={post.id} className={`shadow-md hover:shadow-lg transition-shadow border-t-4 ${post.platform === "LinkedIn" ? "border-t-[#0077b5]" : "border-t-[#ff6719]"}`}>
+                    <CardHeader className="pb-3 border-b bg-gray-50/50">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className={`font-extrabold text-sm ${post.platform === "LinkedIn" ? "text-[#0077b5]" : "text-[#ff6719]"}`}>{post.platform} Post</span>
+                        <span className="text-xs font-bold bg-green-100 text-green-800 px-2 py-1 rounded-full shadow-sm">{post.status}</span>
+                      </div>
+                      <CardDescription className="flex items-center mt-2">
+                        <PostDatePicker postId={post.id} defaultDate={post.scheduledDate.toISOString()} />
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4 flex flex-col justify-between h-[250px]">
+                      <div className="overflow-y-auto pr-2">
+                        <p className="text-sm text-gray-800 whitespace-pre-wrap">{post.content}</p>
+                      </div>
+                      <div className="mt-4 pt-4 border-t flex justify-end shrink-0 w-full">
+                        <PostFeedbackActions postId={post.id} status={post.status} />
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="p-10 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg text-center">
+            <p className="text-gray-600 font-medium text-lg">⚠️ The AI cannot generate content yet.</p>
+            <p className="text-gray-500 mt-2">Please synthesize your custom Mother Doc Voice Profile above before utilizing the content generation engine.</p>
+          </div>
+        )}
       </div>
 
       <div className="mt-8">

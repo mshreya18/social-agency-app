@@ -21,8 +21,9 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  questionnaire Questionnaire?
-  motherDoc     MotherDoc?
+  questionnaire  Questionnaire?
+  motherDoc      MotherDoc?
+  generatedPosts GeneratedPost[]
 }
 
 model Questionnaire {
@@ -44,4 +45,17 @@ model MotherDoc {
   contentPillars   String   // The 10 distinct sub-pillars of interest
   baselineAccounts String   // Accounts they would like to emulate
   updatedAt        DateTime @updatedAt
+}
+
+model GeneratedPost {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  platform      String   // e.g. "LinkedIn", "Substack"
+  content       String   // The actual written post
+  scheduledDate DateTime // Target date for posting
+  status        String   @default("DRAFT") // DRAFT, APPROVED, PUBLISHED
+  feedbackNotes String?  // Client's requested edits
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
